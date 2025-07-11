@@ -1,0 +1,68 @@
+plugins {
+    id 'java'
+    id 'application'
+    id 'idea'
+}
+
+group = 'com.example'
+version = '1.0-SNAPSHOT'
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
+}
+
+repositories {
+    mavenCentral()
+    google()
+    maven { url = 'https://jitpack.io' }
+}
+
+dependencies {
+    // Appium Java client для Appium 1.x
+    implementation 'io.appium:java-client:7.6.0'
+    // TestNG
+    testImplementation 'org.testng:testng:7.8.0'
+    // Allure TestNG
+    testImplementation 'io.qameta.allure:allure-testng:2.24.0'
+    // log4j
+    implementation 'org.apache.logging.log4j:log4j-core:2.20.0'
+    implementation 'org.apache.logging.log4j:log4j-api:2.20.0'
+    // Jackson for JSON test data
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.15.2'
+    // Selenium support для Appium 1.x
+    implementation 'org.seleniumhq.selenium:selenium-support:3.141.59'
+    implementation 'org.seleniumhq.selenium:selenium-api:3.141.59'
+}
+
+test {
+    useTestNG() {
+        suites 'src/test/resources/testng.xml'
+    }
+    systemProperty "allure.results.directory", "build/allure-results"
+    systemProperty "file.encoding", "UTF-8"
+}
+
+application {
+    mainClass = 'com.example.Main'
+}
+
+task runOpenYandexMusic(type: JavaExec) {
+    group = 'application'
+    description = 'Запускает main-класс OpenYandexMusic для открытия приложения на телефоне через Appium.'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'com.example.OpenYandexMusic'
+}
+
+// Настройки для IntelliJ IDEA / Android Studio
+idea {
+    module {
+        downloadJavadoc = true
+        downloadSources = true
+    }
+}
+
+// Настройки кодировки
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+} 
