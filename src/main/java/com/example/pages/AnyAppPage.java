@@ -12,10 +12,12 @@ public class AnyAppPage {
         try {
             DesiredCapabilities caps = new DesiredCapabilities();
             caps.setCapability("platformName", "Android");
-            caps.setCapability("automationName", "UiAutomator2");
-            caps.setCapability("deviceName", deviceName);
-            caps.setCapability("appPackage", appPackage);
-            caps.setCapability("appActivity", appActivity);
+            caps.setCapability("appium:automationName", "UiAutomator2");
+            caps.setCapability("appium:deviceName", deviceName);
+            caps.setCapability("appium:appPackage", appPackage);
+            caps.setCapability("appium:appActivity", appActivity);
+            caps.setCapability("appium:noReset", true);
+            caps.setCapability("appium:newCommandTimeout", 60);
             System.out.println("Пробую открыть: " + appPackage + "/" + appActivity + " на устройстве: " + deviceName);
             driver = new AndroidDriver(new URL("http://127.0.0.1:4723/wd/hub"), caps);
             System.out.println("Приложение успешно открыто!");
