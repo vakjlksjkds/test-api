@@ -1,22 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd" >
-<suite name="AppiumTestSuite" parallel="tests" thread-count="2">
+<suite name="YandexMusicTestSuite" parallel="tests" thread-count="1">
     
-    <!-- Рабочие тесты без зависимостей от Appium -->
-    <test name="WorkingTests" parallel="methods" thread-count="1">
+    <!-- Тест открытия Яндекс.Музыка -->
+    <test name="YandexMusicTest" parallel="methods" thread-count="1">
         <classes>
-            <class name="com.example.tests.WorkingTest"/>
-            <class name="com.example.tests.SimpleTest"/>
-        </classes>
-    </test>
-    
-    <!-- Тесты с Appium (будут пропущены если сервер недоступен) -->
-    <test name="AppiumTests" parallel="methods" thread-count="1">
-        <classes>
-            <class name="com.example.tests.LoginTest"/>
-            <class name="com.example.tests.ChromeOpenTest"/>
-            <class name="com.example.tests.AnyAppOpenTest"/>
-            <class name="com.example.tests.UniversalAppOpenTest"/>
+            <class name="com.example.tests.YandexMusicTest"/>
         </classes>
     </test>
     
