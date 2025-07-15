@@ -31,7 +31,7 @@ public class YandexMusicTest {
             caps.setCapability("appium:deviceName", deviceName);
             caps.setCapability("appium:appPackage", appPackage);
             caps.setCapability("appium:appActivity", appActivity);
-            caps.setCapability("appium:noReset", true);
+            caps.setCapability("appium:noReset", false);
             caps.setCapability("appium:newCommandTimeout", 60);
             
             // Создаем драйвер
