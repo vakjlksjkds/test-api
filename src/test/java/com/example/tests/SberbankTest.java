@@ -299,10 +299,80 @@ public class SberbankTest {
             } catch (Exception ex) {
                 System.out.println("Не удалось сохранить финальный скриншот: " + ex.getMessage());
             }
+
+            // Клик по элементу с текстом 'Определитель номера\nуправление звонками' (XPath, затем по координатам)
+            boolean callerIdClicked = false;
+            try {
+                WebElement element = driver.findElement(By.xpath("//*[contains(@text, 'Определитель номера') and contains(@text, 'управление звонками') ]"));
+                element.click();
+                System.out.println("Клик по элементу с текстом 'Определитель номера\\nуправление звонками' выполнен");
+                callerIdClicked = true;
+            } catch (Exception e) {
+                System.out.println("Не удалось кликнуть по элементу с текстом 'Определитель номера\\nуправление звонками': " + e.getMessage());
+            }
+            // Если не получилось — клик по координатам центра Column
+            if (!callerIdClicked) {
+                try {
+                    int x = (int)((40 + 132/2.0) * 600.0 / 160.0); // x=40dp, width=132dp
+                    int y = (int)((365 + 82/2.0) * 600.0 / 160.0); // y=365dp, height=82dp
+                    PointerInput finger = new PointerInput(PointerInput.Kind.TOUCH, "finger");
+                    Sequence tap = new Sequence(finger, 1);
+                    tap.addAction(finger.createPointerMove(Duration.ZERO, PointerInput.Origin.viewport(), x, y));
+                    tap.addAction(finger.createPointerDown(PointerInput.MouseButton.LEFT.asArg()));
+                    tap.addAction(finger.createPointerUp(PointerInput.MouseButton.LEFT.asArg()));
+                    driver.perform(Arrays.asList(tap));
+                    System.out.println("Tap по координатам центра 'Определитель номера' (" + x + ", " + y + ") через W3C Actions выполнен");
+                } catch (Exception e) {
+                    System.out.println("Не удалось тапнуть по координатам центра 'Определитель номера': " + e.getMessage());
+                }
+            }
+            // Скриншот после клика по 'Определитель номера\nуправление звонками'
+            try {
+                File srcFile = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
+                File destFile = new File("sberbank_callerid_final.png");
+                Files.copy(srcFile.toPath(), destFile.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+                System.out.println("Скриншот после клика по 'Определитель номера' сохранён: " + destFile.getAbsolutePath());
+            } catch (Exception ex) {
+                System.out.println("Не удалось сохранить скриншот после клика по 'Определитель номера': " + ex.getMessage());
+            }
             // После этого никаких кликов и действий не выполнять
             
             System.out.println("🏦 СберБанк успешно открыт!");
             Assert.assertTrue(true, "СберБанк должен быть открыт");
+            
+            // --- Очистка файлов logcat.txt и metrics.txt перед поиском метрик ---
+            try {
+                java.nio.file.Files.write(new File("logcat.txt").toPath(), new byte[0], java.nio.file.StandardOpenOption.CREATE, java.nio.file.StandardOpenOption.TRUNCATE_EXISTING);
+                java.nio.file.Files.write(new File("metrics.txt").toPath(), new byte[0], java.nio.file.StandardOpenOption.CREATE, java.nio.file.StandardOpenOption.TRUNCATE_EXISTING);
+            } catch (Exception e) {
+                System.out.println("Ошибка при очистке файлов logcat.txt или metrics.txt: " + e.getMessage());
+            }
+            // --- Сохраняем logcat и ищем метрику в нем ---
+            String metric = "sending event: \"Security CheckBlockCalls Back Click\"";
+            boolean metricFound = false;
+            try {
+                // Сохраняем logcat
+                Process proc = Runtime.getRuntime().exec("adb logcat -d");
+                java.io.InputStream is = proc.getInputStream();
+                java.nio.file.Files.copy(is, new File("logcat.txt").toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+                is.close();
+                proc.waitFor();
+                // Ищем метрику в logcat.txt
+                String logContent = new String(java.nio.file.Files.readAllBytes(new File("logcat.txt").toPath()), java.nio.charset.StandardCharsets.UTF_8);
+                if (logContent.contains(metric)) {
+                    metricFound = true;
+                }
+            } catch (Exception e) {
+                System.out.println("Ошибка при поиске метрики в logcat: " + e.getMessage());
+            }
+            try {
+                File metricFile = new File("metrics.txt");
+                String result = metricFound ? metric : (metric + ": не найдено");
+                java.nio.file.Files.write(metricFile.toPath(), (result + System.lineSeparator()).getBytes(java.nio.charset.StandardCharsets.UTF_8), java.nio.file.StandardOpenOption.CREATE, java.nio.file.StandardOpenOption.APPEND);
+                System.out.println("Результат поиска метрики добавлен в " + metricFile.getAbsolutePath());
+            } catch (Exception e) {
+                System.out.println("Ошибка при записи метрики в файл: " + e.getMessage());
+            }
             
         } catch (Exception e) {
             logger.error("Sberbank test failed", e);
