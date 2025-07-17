@@ -77,7 +77,7 @@ public class SberbankTest {
             }
 
             // Ждем немного, чтобы приложение полностью загрузилось
-            Thread.sleep(3000);
+            Thread.sleep(1000); // ускорено
 
             // Ввести пароль 11225
             String pin = "11225";
@@ -89,7 +89,7 @@ public class SberbankTest {
                             "new UiSelector().resourceId(\"" + buttonId + "\")"
                         )
                     ).click();
-                    Thread.sleep(300);
+                    Thread.sleep(100); // ускорено
                 } catch (Exception e) {
                     System.out.println("Не удалось нажать кнопку " + digit + ": " + e.getMessage());
                 }
@@ -174,7 +174,7 @@ public class SberbankTest {
                     swipe.addAction(finger.createPointerMove(Duration.ofMillis(500), PointerInput.Origin.viewport(), startX, endY));
                     swipe.addAction(finger.createPointerUp(PointerInput.MouseButton.LEFT.asArg()));
                     driver.perform(Arrays.asList(swipe));
-                    Thread.sleep(500);
+                    Thread.sleep(200); // ускорено
                 }
                 System.out.println("Экран прокручен вниз (swipe up) после открытия настроек");
             } catch (Exception e) {
@@ -266,7 +266,7 @@ public class SberbankTest {
                 int x = (int)(tapPointsDp[i][0] * 600.0 / 160.0);
                 int y = (int)(tapPointsDp[i][1] * 600.0 / 160.0);
                 try {
-                    Thread.sleep(500);
+                    Thread.sleep(100); // ускорено
                 } catch (InterruptedException e) { /* ignore */ }
                 try {
                     PointerInput finger = new PointerInput(PointerInput.Kind.TOUCH, "finger");
@@ -378,6 +378,35 @@ public class SberbankTest {
             logger.error("Sberbank test failed", e);
             System.out.println("Не удалось открыть приложение: " + e.getMessage());
             throw new SkipException("Appium/Device error: " + e.getMessage());
+        }
+
+        // --- Автоматический звонок с другого устройства, если оно подключено ---
+        try {
+            System.out.println("[CALL] Проверяю подключение устройства RZ8RA1RR24W...");
+            Process checkProc = Runtime.getRuntime().exec("adb devices");
+            java.io.BufferedReader reader = new java.io.BufferedReader(new java.io.InputStreamReader(checkProc.getInputStream()));
+            String line;
+            boolean deviceFound = false;
+            while ((line = reader.readLine()) != null) {
+                System.out.println("[CALL] adb devices output: " + line);
+                if (line.startsWith("RZ8RA1RR24W") && line.trim().endsWith("device")) {
+                    deviceFound = true;
+                    break;
+                }
+            }
+            if (deviceFound) {
+                System.out.println("[CALL] Устройство найдено. Инициирую звонок...");
+                Process callProc = Runtime.getRuntime().exec(new String[]{"adb", "-s", "RZ8RA1RR24W", "shell", "am", "start", "-a", "android.intent.action.CALL", "-d", "tel:89156111455"});
+                callProc.waitFor();
+                System.out.println("[CALL] Звонок с RZ8RA1RR24W инициирован. Ожидание 20 секунд...");
+                Thread.sleep(20000); // Просто ждём, звонок не сбрасываем
+                System.out.println("[CALL] 20 секунд ожидания завершены, звонок не сброшен автоматически.");
+            } else {
+                System.out.println("[CALL] Устройство RZ8RA1RR24W не подключено, звонок не инициируется");
+            }
+        } catch (Exception e) {
+            System.out.println("[CALL] Ошибка при попытке автоматического звонка: " + e.getMessage());
+            e.printStackTrace();
         }
     }
     
