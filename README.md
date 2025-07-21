@@ -61,36 +61,6 @@ adb devices
 appium
 ```
 
-## Запуск тестов
-
-### Через Android Studio
-
-1. Откройте проект в Android Studio
-2. Перейдите в папку `src/test/java/com/example/tests/`
-3. Правый клик на тестовом классе → "Run 'TestClassName'"
-
-### Через Gradle
-
-```bash
-# Запуск всех тестов
-./gradlew test
-
-# Запуск конкретного теста
-./gradlew test --tests LoginTest
-
-# Запуск с отчетом Allure
-./gradlew test
-./gradlew allureReport
-./gradlew allureServe
-```
-
-### Через TestNG
-
-```bash
-# Запуск через TestNG XML
-./gradlew test --tests "TestNG"
-```
-
 ## Конфигурация тестов
 
 ### Настройки Appium
@@ -177,3 +147,60 @@ adb start-server
 1. Проверьте логи в папке `logs/`
 2. Убедитесь в совместимости версий Appium Server и Java Client
 3. Проверьте подключение устройства через ADB 
+
+---
+
+## Быстрый старт: автоматическая подготовка окружения
+
+### macOS/Linux/WSL
+1. Откройте терминал в папке проекта.
+2. Выполните:
+   ```sh
+   chmod +x setup_env.sh
+   ./setup_env.sh
+   ```
+   Скрипт автоматически проверит и установит:
+   - Java JDK
+   - Node.js и npm
+   - Appium
+   - adb (Android Platform Tools)
+   - Права на gradlew и run_tests.sh
+   - Переменные среды для Android SDK
+   - Подключение устройства
+   - Сборку проекта
+
+### Windows
+1. Откройте **Git Bash** или **WSL** в папке проекта.
+2. Выполните:
+   ```sh
+   bash setup_env.sh
+   ```
+   Если что-то не установится автоматически, следуйте инструкциям скрипта (например, скачайте Java, Node.js, Android SDK вручную).
+
+#### Альтернатива для Windows (cmd.exe)
+- Для запуска в обычном cmd.exe нужен отдельный `.bat`-скрипт (по запросу).
+- В .bat-скрипте используются Chocolatey/winget для установки зависимостей.
+- Если нужен такой скрипт — напишите!
+
+---
+
+## Запуск тестов
+После подготовки окружения:
+```sh
+./run_tests.sh
+```
+или
+```sh
+./gradlew test
+```
+
+---
+
+## Важно
+- Для мобильных тестов должен быть установлен Android SDK и подключено устройство (или эмулятор).
+- Appium Server должен быть запущен:
+  ```sh
+  appium --base-path /wd/hub --port 4723
+  ```
+- Если что-то не работает — проверьте переменные среды и логи. 
+

@@ -348,7 +348,7 @@ public class SberbankTest {
                 System.out.println("Ошибка при очистке файлов logcat.txt или metrics.txt: " + e.getMessage());
             }
             // --- Сохраняем logcat и ищем метрику в нем ---
-            String metric = "sending event: \"Security CheckBlockCalls Back Click\"";
+            String metric = "sending event: \"Security CheckBlockCalls Show\"";
             boolean metricFound = false;
             try {
                 // Сохраняем logcat
@@ -357,21 +357,25 @@ public class SberbankTest {
                 java.nio.file.Files.copy(is, new File("logcat.txt").toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
                 is.close();
                 proc.waitFor();
-                // Ищем метрику в logcat.txt
-                String logContent = new String(java.nio.file.Files.readAllBytes(new File("logcat.txt").toPath()), java.nio.charset.StandardCharsets.UTF_8);
-                if (logContent.contains(metric)) {
-                    metricFound = true;
+                // Ищем метрику в logcat.txt с правильной кодировкой
+                java.nio.file.Path logcatPath = java.nio.file.Paths.get("logcat.txt");
+                java.util.List<String> logLines = java.nio.file.Files.readAllLines(logcatPath, java.nio.charset.StandardCharsets.UTF_8);
+                for (String line : logLines) {
+                    if (line.contains(metric)) {
+                        metricFound = true;
+                        break;
+                    }
                 }
+                // Записываем результат в metrics.txt
+                java.io.FileWriter writer = new java.io.FileWriter("metrics.txt", false);
+                if (metricFound) {
+                    writer.write(metric + " | Вход в caller id метрика найденна\n");
+                } else {
+                    writer.write("Вход в caller id метрика НЕ найденна\n");
+                }
+                writer.close();
             } catch (Exception e) {
-                System.out.println("Ошибка при поиске метрики в logcat: " + e.getMessage());
-            }
-            try {
-                File metricFile = new File("metrics.txt");
-                String result = metricFound ? metric : (metric + ": не найдено");
-                java.nio.file.Files.write(metricFile.toPath(), (result + System.lineSeparator()).getBytes(java.nio.charset.StandardCharsets.UTF_8), java.nio.file.StandardOpenOption.CREATE, java.nio.file.StandardOpenOption.APPEND);
-                System.out.println("Результат поиска метрики добавлен в " + metricFile.getAbsolutePath());
-            } catch (Exception e) {
-                System.out.println("Ошибка при записи метрики в файл: " + e.getMessage());
+                e.printStackTrace();
             }
             
         } catch (Exception e) {
